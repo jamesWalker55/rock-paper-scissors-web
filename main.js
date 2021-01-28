@@ -105,17 +105,20 @@ function buttonGroupEnable(buttonMap) {
  * @param  {boolean} undim Whether to undim or not
  */
 function animationFlip(element, callback, callback2=null, undim=true) {
-  element.addEventListener("animationend", callback);
   element.classList.add("ani-cardclose");
-  element.addEventListener("animationend", unflipCard);
-  function unflipCard() {
+  element.addEventListener("animationend", firstHalf);
+  function firstHalf() {
+    element.removeEventListener("animationend", firstHalf);
+    if (typeof callback == "function") {callback();}
     if (undim) {element.classList.remove("hand_darken");}
     element.classList.add("ani-cardopen");
     element.classList.remove("ani-cardclose");
-    element.addEventListener("animationend", callback2);
-    element.addEventListener("animationend", () => {
+    element.addEventListener("animationend", secondHalf);
+    function secondHalf() {
+      element.removeEventListener("animationend", secondHalf);
+      if (typeof callback2 == "function") {callback2();}
       element.classList.remove("ani-cardopen");
-    })
+    }
   }
   // element.classList.add("hand_darken");
 }
@@ -178,11 +181,13 @@ function animationIsActive(element) {
  */
 function fadeAway(element, callback) {
   element.classList.add("ani-fadeout");
-  element.addEventListener("animationend", () => {
+  element.addEventListener("animationend", doCallback);
+  function doCallback() {
+    element.removeEventListener("animationend", doCallback);
     element.classList.add("hidden");
     element.classList.remove("ani-fadeout");
     if (typeof callback == "function") {callback();}
-  });
+  }
 }
 
 /**
@@ -194,11 +199,13 @@ function fadeAway(element, callback) {
 function fadeBack(element, callback) {
   element.classList.remove("hidden");
   element.classList.add("ani-fadein");
-  element.addEventListener("animationend", () => {
+  element.addEventListener("animationend", doCallback);
+  function doCallback() {
+    element.removeEventListener("animationend", doCallback)
     element.classList.remove("ani-fadein");
     element.classList.remove("hidden");
     if (typeof callback == "function") {callback();}
-  });
+  }
 }
 
 // ====================useful functions====================
@@ -210,8 +217,8 @@ function fadeBack(element, callback) {
  * @param  {String} when    when to execute function, in `middle` of fade, or at `end` of fade
  */
 function fadeChangeText(element, text, callback=null, when="end") {
-  fadeAway(element, () => setTimeout(codeToRun, 90));
-  function codeToRun() {
+  fadeAway(element, secondHalf);
+  function secondHalf() {
     element.innerText = text;
     if (when=="middle") {
       //middle
@@ -383,44 +390,9 @@ for (const hand of hands) {
 // get single button 
 single_button_container = document.getElementById("single-button");
 single_button = document.getElementById("btn-single");
-// single_button.addEventListener("click", initialPrompt);
 single_button.onclick = initialPrompt  // only 1 function allowed
 
 msgBox = document.querySelector("#message");
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// document.querySelector("#btn_disable").addEventListener(
-//   "click", 
-//   () => buttonGroupDisable(hand_buttons)
-//   );
-
-// document.querySelector("#btn_enable").addEventListener(
-//   "click", 
-//   () => buttonGroupEnable(hand_buttons)
-//   );
-
-// let foo = document.querySelector("#display_table");
-// btn_fadeaway = document.getElementById("btn_fadeaway");
-// btn_fadeaway.addEventListener("click", ()=>{
-//   fadeAway(foo);
-// });
-// btn_fadeback = document.getElementById("btn_fadeback");
-// btn_fadeback.addEventListener("click", ()=>{
-//   fadeBack(foo);
-// });
