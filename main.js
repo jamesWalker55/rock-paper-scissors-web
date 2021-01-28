@@ -266,12 +266,13 @@ function flipHandDisplays(player_hand, cpu_hand, callback) {
   player, 
   () => {
     changeDisplayHand(player, player_hand);
-    animationFlip(cpu, () => {
-      changeDisplayHand(cpu, cpu_hand)
-      if (typeof callback == "function") {callback();}
-    });
   },
   callback);
+  
+  animationFlip(cpu, () => {
+    changeDisplayHand(cpu, cpu_hand)
+    if (typeof callback == "function") {callback();}
+  });
 }
 
 function dimLoserDisplay() {
