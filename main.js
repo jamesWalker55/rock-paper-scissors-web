@@ -316,26 +316,62 @@ function updateInterface() {
   let player_score = memory.get("player points");
   let computer_score = memory.get("computer points");
   let result = memory.get("result");
-  // set message
-  let message;
-  if (result=="win") {
-    message = `Your ${player} won against ${computer}! Choose a hand:`
-  } else if (result=="lose") {
-    message = `Your ${player} lost to ${computer}! Choose a hand:`
-  } else {
-    message = `Both sides gave a ${player}! Choose a hand:`
-  }
-  setScoreDisplay("player", player_score);
-  setScoreDisplay("computer", computer_score);
-  
-  // flip displays, then show loser
-  flipHandDisplays(player, computer, () => {
-    setTimeout(dimLoserDisplay, 500);
-    fadeChangeText(msgBox, message, enableButtons, "end")
-  });
+  let MAX_POINTS = memory.get("points to win");
+  if (player_score>=MAX_POINTS || computer_score>=MAX_POINTS) {
+    // end game
+    let message;
+    if (result=="win") {
+      message = `You got ${MAX_POINTS} points first. You win! Play again?`
+    } else if (result=="lose") {
+      message = `The computer got ${MAX_POINTS} points first. You lost! Play again?`
+    } else {
+      message = `This is not supposed to happen what the fuck did you do`
+    }
 
-  function enableButtons() {
-    buttonGroupEnable(hand_buttons)
+    // flip displays, then show loser
+    flipHandDisplays(player, computer, () => {
+      setTimeout(dimLoserDisplay, 500);
+      setTimeout(() => {
+        setScoreDisplay("player", player_score);
+        setScoreDisplay("computer", computer_score);
+      }, 1500);
+      fadeChangeText(msgBox, message, setTimeout(secondPart, 700), "end")
+    });
+
+    function secondPart() {
+      fadeAway(hand_buttons_container, () => {
+        fadeBack(single_button_container);
+        buttonGroupEnable(hand_buttons);
+      });
+      single_button.onclick = retryPrompt;
+    }
+  } else {
+    // continue game
+    // set message
+    let message;
+    if (result=="win") {
+      message = `Your ${player} won against ${computer}! Choose a hand:`
+    } else if (result=="lose") {
+      message = `Your ${player} lost to ${computer}! Choose a hand:`
+    } else {
+      message = `Both sides gave ${player}! Choose a hand:`
+    }
+
+    // flip displays, then show loser
+    flipHandDisplays(player, computer, () => {
+      setTimeout(dimLoserDisplay, 500);
+      setTimeout(() => {
+        setScoreDisplay("player", player_score);
+        setScoreDisplay("computer", computer_score);
+        buttonGroupEnable(hand_buttons)
+      }, 800);
+      fadeChangeText(msgBox, message)
+    });
+
+    function secondPart() {
+      setScoreDisplay("player", player_score);
+      setScoreDisplay("computer", computer_score);
+    }
   }
 }
 
@@ -357,9 +393,42 @@ function initialPrompt() {
 }
 
 /**
+ * Used after prompted to retry the game
+ */
+function retryPrompt() {
+  let setupButton = () => {
+    buttonEnable(single_button);
+    single_button.onclick = () => {
+      startGame();
+      let player = memory.get("player hand");
+      let computer = memory.get("computer hand");
+      let player_score = memory.get("player points");
+      let computer_score = memory.get("computer points");
+      setScoreDisplay("player", player_score);
+      setScoreDisplay("computer", computer_score);
+      flipHandDisplays(player, computer);
+    };
+  }
+  buttonDisable(single_button);
+  fadeChangeText(
+    msgBox, 
+    "Be the first to get 10 points to win!", 
+    ()=>fadeChangeText(single_button, "Let's play", setupButton, "middle"),
+    "middle"
+    );
+}
+
+/**
  * Used when game is started for the first round
  */
 function startGame() {
+  // reinitialize memory
+  memory.set("player points", 0);
+  memory.set("computer points", 0);
+  memory.set("player hand", "none");
+  memory.set("computer hand", "none");
+  memory.set("result", "none");
+
   fadeChangeText(msgBox, "Choose a hand:");
   fadeAway(
     single_button_container,
@@ -369,11 +438,7 @@ function startGame() {
 
 
 let memory = new Map();
-memory.set("player points", 0);
-memory.set("computer points", 0);
-memory.set("player hand", null);
-memory.set("computer hand", null);
-memory.set("result", null);
+memory.set("points to win", 10);
 
 // setup hand buttons
 hand_buttons_container = document.getElementById("hand-buttons");

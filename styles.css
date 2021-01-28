@@ -37,6 +37,7 @@ h1 {
   border-radius: 4px;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
   padding: 1em 2em;
+  /*transition-duration: 0.2s;*/
 }
 
 /*=====================Anchors=====================*/
@@ -92,13 +93,11 @@ button {
   border-style: solid;
   border-width: 1px;
   border-color: rgb(220, 220, 220);
-  /*border-color: #00000000;*/
   border-radius: 4px;
   background-color: #ffffff;
   padding: 0.5em 1em;
   margin: 1em 0.5em;
   color: rgb(110,110,110);
-  /*box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;*/
 }
 
 button:hover {
@@ -235,14 +234,14 @@ img {
 
 .ani-fadein {
   animation-name: fadein;
-  animation-duration: 250ms;
+  animation-duration: 200ms;
   animation-fill-mode: forwards;
   animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
 }
 
 .ani-fadeout {
   animation-name: fadeout;
-  animation-duration: 250ms;
+  animation-duration: 200ms;
   animation-fill-mode: forwards;
   animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
 }
