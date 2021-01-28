@@ -3,13 +3,38 @@
     <head>
         <meta charset="utf-8">
         <title>Rock Paper Scissors</title>
-        <style>
-            * {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            }
-        </style>
+        <!-- <link rel="stylesheet" href="reset.css"> -->
+        <link rel="stylesheet" href="styles.css">
     </head>
     <body>
+        <h1>Odin Project - Rock Paper Scissors</h1>
+        <div id="container">
+            <div id="display_table">
+                <div class="display_header" style="grid-column: 1; grid-row: 1;">You</div>
+                <div class="display_header" style="grid-column: 2; grid-row: 1;">CPU</div>
+                <div id="display_player" style="grid-column: 1; grid-row: 2;">
+                    <img src="./res/none.png" >
+                </div>
+                <div id="display_computer" style="grid-column: 2; grid-row: 2;">
+                    <img src="./res/none.png" >
+                </div>
+                <div id="score_player" class="display_score" style="grid-column: 1; grid-row: 3;">0 points</div>
+                <div id="score_computer" class="display_score" style="grid-column: 2; grid-row: 3;">0 points</div>
+            </div>
+            <div id="message">Play Rock, Paper, Scissors</div>
+            <div id="single-button">
+                <button id="btn-single">Start game</button>
+            </div>
+            <div id="hand-buttons">
+                <button id="btn-rock">Rock</button>
+                <button id="btn-paper">Paper</button>
+                <button id="btn-scissors">Scissors</button>
+            </div>
+        </div>
+        <!-- <button id="btn_enable">Enable</button> -->
+        <!-- <button id="btn_disable">Disable</button> -->
+        <!-- <button id="btn_fadeaway">fuck off</button> -->
+        <!-- <button id="btn_fadeback">fuck back</button> -->
         <script src="main.js"></script>
     </body>
 </html>
