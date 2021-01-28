@@ -1,3 +1,4 @@
+// =======================game logic=======================
 function getRandomIntInclusive(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -5,8 +6,6 @@ function getRandomIntInclusive(min, max) {
 }
 
 function getOutcome(playerSelection, computerSelection) {
-  playerSelection = playerSelection.toLowerCase();
-  computerSelection = computerSelection.toLowerCase();
   let LOSE = "lose";
   let WIN = "win";
   let DRAW = "draw";
@@ -43,24 +42,12 @@ function getOutcome(playerSelection, computerSelection) {
 function playRound(hand) {
   let randInt = getRandomIntInclusive(0,2);
   let player = hand;
-  let computer;
-  switch (randInt) {
-    case 0:
-      computer = "rock";
-      break;
-    case 1:
-      computer = "paper";
-      break;
-    case 2:
-      computer = "scissors";
-      break;
-  }
-
+  let computer = ["rock","paper","scissors"][randInt];
   return [player, computer, getOutcome(player, computer)];
 }
 
 
-// ===============Enable/Disable hand buttons===============
+// ===============Enable/Disable buttons===============
 /**
  * Disables a button
  * @param  {Element} button A button element
@@ -114,17 +101,16 @@ function animationFlip(element, callback, callback2=null, undim=true) {
     element.classList.add("ani-cardopen");
     element.classList.remove("ani-cardclose");
     element.addEventListener("animationend", secondHalf);
-    function secondHalf() {
-      element.removeEventListener("animationend", secondHalf);
-      if (typeof callback2 == "function") {callback2();}
-      element.classList.remove("ani-cardopen");
-    }
   }
-  // element.classList.add("hand_darken");
+  function secondHalf() {
+    element.removeEventListener("animationend", secondHalf);
+    if (typeof callback2 == "function") {callback2();}
+    element.classList.remove("ani-cardopen");
+  }
 }
 
 /**
- * Change display to given hand
+ * Change image of display to given hand instantly
  * @param  {Element} display The display element containing the `<img>` element, should be `display_player` or `display_computer`
  * @param  {string} hand     The hand to change to, `rock`, `paper`, `scissors`, `none`
  */
@@ -133,42 +119,25 @@ function changeDisplayHand(display, hand) {
   image.src = `./res/${hand}.png`;
 }
 
-function test() {
+/**
+ * Flips both displays, changing content to given hands mid-flip
+ * @param  {String}   player_hand Hand of player
+ * @param  {String}   cpu_hand    Hand of computer
+ * @param  {Function} callback    Function to call mid-animation
+ */
+function flipHandDisplays(player_hand, cpu_hand, callback) {
   let cpu = document.querySelector("#display_computer");
   let player = document.querySelector("#display_player");
   animationFlip(
-  player, 
-  () => {
-    changeDisplayHand(player, "rock")
-    animationFlip(cpu, () => changeDisplayHand(cpu, "scissors"))
+    player, 
+    () => changeDisplayHand(player, player_hand)
+  );
+  animationFlip(
+    cpu, 
+    () => {
+      changeDisplayHand(cpu, cpu_hand)
+      if (typeof callback == "function") {callback();}
   });
-}
-
-// ===============animation utilities===============
-
-/**
- * Adds an attribute showing the element is being animated
- * @param  {Element} element
- */
-function animationSetActive(element) {
-  element.setAttribute("data-animating", "true");
-}
-
-/**
- * Removes the attribute showing the element is being animated
- * @param  {Element} element
- */
-function animationSetInactive(element) {
-  element.setAttribute("data-animating", "false");
-}
-
-/**
- * Checks if element is being animated
- * @param  {Element} element
- */
-function animationIsActive(element) {
-  let isAnimating = element.getAttribute("data-animating");
-  return isAnimating=="true"
 }
 
 // ================fade animation================
@@ -208,7 +177,6 @@ function fadeBack(element, callback) {
   }
 }
 
-// ====================useful functions====================
 /**
  * change the text in a element, with fading animation
  * @param  {Element} element `#message` div element
@@ -221,16 +189,15 @@ function fadeChangeText(element, text, callback=null, when="end") {
   function secondHalf() {
     element.innerText = text;
     if (when=="middle") {
-      //middle
       if (typeof callback == "function") {callback();}
       fadeBack(element);
     } else {
-      //end
       fadeBack(element, callback);
     }
   }
 }
 
+// ====================Dimming display====================
 /**
  * Slowly dims display of a person, it is `player` or `computer`
  * @param  {String} person `player` or `computer`
@@ -250,31 +217,8 @@ function undimDisplay(person) {
 }
 
 /**
- * Set points text to value, `person` is either `player` or `computer`
- * @param {String} person The side to set the points
- * @param {number} points The value of the points
+ * Dim display of the loser, by getting result from `memory.get("result")`
  */
-function setScoreDisplay(person, points) {
-  element = document.getElementById(`score_${person}`);
-  element.innerText = `${points} points`;
-}
-
-function flipHandDisplays(player_hand, cpu_hand, callback) {
-  let cpu = document.querySelector("#display_computer");
-  let player = document.querySelector("#display_player");
-  animationFlip(
-  player, 
-  () => {
-    changeDisplayHand(player, player_hand);
-  },
-  callback);
-  
-  animationFlip(cpu, () => {
-    changeDisplayHand(cpu, cpu_hand)
-    if (typeof callback == "function") {callback();}
-  });
-}
-
 function dimLoserDisplay() {
   result = memory.get("result");
   if (result=="win") {
@@ -287,8 +231,22 @@ function dimLoserDisplay() {
   }
 }
 
-// =====================main code=====================
+// ====================other display functions====================
+/**
+ * Set points text to value, `person` is either `player` or `computer`
+ * @param {String} person The side to set the points
+ * @param {number} points The value of the points
+ */
+function setScoreDisplay(person, points) {
+  element = document.getElementById(`score_${person}`);
+  element.innerText = `${points} points`;
+}
 
+// =====================main code=====================
+/**
+ * Update values in memory based on given hand
+ * @param  {String} hand The hand the player played
+ */
 function playHand(hand) {
   output = playRound(hand);
   player = output[0];
@@ -305,10 +263,13 @@ function playHand(hand) {
     score_computer = memory.get("computer points");
     memory.set("computer points", score_computer+1);
   }
-  console.log(memory);
+  // console.log(memory);
   updateInterface();
 }
 
+/**
+ * Update page UI to reflect memory data
+ */
 function updateInterface() {
   buttonGroupDisable(hand_buttons)
   // get variables
@@ -413,14 +374,14 @@ function retryPrompt() {
   buttonDisable(single_button);
   fadeChangeText(
     msgBox, 
-    "Be the first to get 10 points to win!", 
+    `Be the first to get ${memory.get("points to win")} points to win!`, 
     ()=>fadeChangeText(single_button, "Let's play", setupButton, "middle"),
     "middle"
     );
 }
 
 /**
- * Used when game is started for the first round
+ * Reset memory, hide message box and single button, show hand buttons
  */
 function startGame() {
   // reinitialize memory
